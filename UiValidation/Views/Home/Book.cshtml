@@ -1,0 +1,74 @@
+﻿@model UiValidation.Models.BookViewModel
+
+@{
+    ViewData["Title"] = "Book";
+}
+
+<h1>Book</h1>
+<hr />
+<form asp-action="Book">
+<div class="row">
+    <input type="hidden" name="DataThumbprintFromLastScan" value="@Model.DataThumbprintFromLastScan" />
+    <div class="col-md-4">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="Book.Title" class="control-label"></label>
+            <input asp-for="Book.Title" class="form-control" />
+            <span asp-validation-for="Book.Title" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Book.GenreId" class="control-label"></label>
+            @Html.DropDownListFor(m => m.Book.GenreId, UiValidation.Collections.Genres.Selection, "-", new { @class = "form-control" })
+            <span asp-validation-for="Book.GenreId" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <br />
+            <input type="submit" class="btn btn-warning" asp-for="Action" value="Check for duplicates" />
+            @if (Model.IsDuplicate)
+            {
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>This book info is already found in the library.</span>
+            }
+        </div>
+    </div>
+    <div class="col-md-4 offset-md-4">
+        @if (Model.IsDuplicate || Model.MustCheckForDuplicates)
+        {
+            <input type="submit" class="btn btn-secondary" value="Proceed to next step" asp-for="Action" disabled />
+        } else
+        {
+            <input type="submit" class="btn btn-secondary" value="Proceed to next step" asp-for="Action" />
+        }
+    </div>
+</div>
+</form>
+<div class="modal" tabindex="-1" id="bsDuplicateScan">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">You missed a step!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>You are required to check if the book you are working on is a duplicate before proceeding to the next step.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @if (Model.MustCheckForDuplicates)
+    {
+        <script type="text/javascript">
+            const modal = new bootstrap.Modal('#bsDuplicateScan');
+            modal.show();
+        </script>
+    }
+}
